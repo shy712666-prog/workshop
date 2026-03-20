@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>皇家仓库</title>
+<style>
+
+{
+  "name": "workshop",
+  "version": "1.0.0",
+  "private": true
+}
+
+{
+  "builds": [
+    { "src": "public/**", "use": "@vercel/static" },
+    { "src": "api/**/*.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ]
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #fff5f9;
+  --bg2: #ffffff;
+  --card: #ffffff;
+  --border: #fce4ec;
+  --border2: #f8bbd0;
+  --pink1: #f48fb1;
+  --pink2: #f06292;
+  --pink3: #ec407a;
+  --pink4: #e91e63;
+  --pinksoft: #fce4ec;
+  --pinkglow: rgba(244, 143, 177, 0.25);
+  --text1: #4a3040;
+  --text2: #7a5a6a;
+  --text3: #b08a9a;
+  --text4: #d4b0c0;
+  --accent: #f06292;
+  --radius: 16px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text1);
+  font-family: 'Quicksand', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/*───顶部导航（手机友好） ─── */
+.topbar {
+  position: sticky;
+  top: 0;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+  padding: 0 20px;
+}
+
+.topbar-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  gap: 4px;
+}
+
+.topbar-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--pink3);
+  margin-right: auto;
+  letter-spacing: 0.5px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text3);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.tab-btn:hover { color: var(--pink2); }
+
+.tab-btn.active {
+  background: var(--pinksoft);
+  color: var(--pink3);
+}
+
+/* ─── 主区域 ─── */
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text1);
+  margin-bottom: 6px;
+}
+
+.page-title .icon {
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.page-desc {
+  font-size: 13px;
+  color: var(--text3);
+  line-height: 1.6;
+}
+
+/* ─── 卡片 ─── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(240, 98, 146, 0.06);
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ─── 转盘 ─── */
+.wheel-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.wheel-frame {
+  position: relative;
+  width: 300px;
+  height: 300px;
+}
+
+.wheel-canvas {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: drop-shadow(0 4px 20px var(--pinkglow));
+}
+
+/*指针改成小爱心 */
+.wheel-pointer {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
+  z-index: 3;
+  filter: drop-shadow(0 2px 4px rgba(233, 30, 99, 0.3));
+  line-height: 1;
+}
+
+.spin-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f48fb1, #f06292);
+  border: 3px solid #fff;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 4;
+  font-family: inherit;
+  box-shadow: 0 3px 12px rgba(240, 98, 146, 0.35);
+  transition: all 0.2s;
+  letter-spacing: 2px;
+}
+
+.spin-btn:hover {
+  transform: translate(-50%, -50%) scale(1.06);
+  box-shadow: 0 4px 20px rgba(240, 98, 146, 0.5);
+}
+
+.spin-btn:active {
+  transform: translate(-50%, -50%) scale(0.96);
+}
+
+.spin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: translate(-50%, -50%);
+}
+
+/* ─── 结果展示 ─── */
+.result-box {
+  width: 100%;
+  text-align: center;
+  padding: 18px;
+  background: linear-gradient(135deg, #fff0f5, #fce4ec);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.result-label {
+  font-size: 12px;
+  color: var(--text3);
+  font-weight: 600;
+}
+
+.result-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--pink3);
+  letter-spacing: 1px;
+}
+
+/* ─── 词条编辑 ─── */
+.items-input {
+  width: 100%;
+  min-height: 120px;
+  background: #fef7fa;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text1);
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.8;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.items-input:focus {
+  outline: none;
+  border-color: var(--pink1);
+  box-shadow: 0 0 0 3px rgba(244, 143, 177, 0.12);
+}
+
+.items-input::placeholder { color: var(--text4); }
+
+/* ─── 按钮组 ─── */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 9px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+}
+
+.btn:hover {
+  border-color: var(--pink1);
+  color: var(--pink2);
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, #f48fb1, #f06292);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(240, 98, 146, 0.25);
+}
+
+.btn.primary:hover {
+  box-shadow: 0 4px 16px rgba(240, 98, 146, 0.35);
+  transform: translateY(-1px);
+}
+
+/* ─── 历史 ─── */
+.history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.history-tag {
+  padding: 5px 14px;
+  background: #fef0f5;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 500;
+}
+
+/* ─── 多层组合 ─── */
+.layer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 520px) {
+  .layer-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+.layer-item label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+
+.layer-item input {
+  width: 100%;
+  background: #fef7fa;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--text1);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.layer-item input:focus {
+  outline: none;
+  border-color: var(--pink1);
+  box-shadow: 0 0 0 3px rgba(244, 143, 177, 0.12);
+}
+
+.combo-result {
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #fff5f9, #fce4ec);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text1);
+  line-height: 1.8;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.combo-result span {
+  color: var(--pink3);
+  font-weight: 700;
+}
+
+/* ─── 占位页─── */
+.placeholder-card {
+  background: var(--card);
+  border: 1.5px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 36px 28px;
+  color: var(--text3);
+  font-size: 14px;
+  line-height: 2;
+}
+
+/* ─── 响应式 ─── */
+@media (max-width: 420px) {
+  .main { padding: 20px 16px 80px; }
+
+  .wheel-frame {
+    width: 260px;
+    height: 260px;
+  }
+
+  .wheel-canvas {
+    width: 260px;
+    height: 260px;
+  }
+
+  .spin-btn {
+    width: 52px;
+    height: 52px;
+    font-size: 13px;
+  }
+
+  .page-title { font-size: 20px; }
+  .result-text { font-size: 18px; }
+
+  .tab-btn {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
+
+  .topbar-title { font-size: 15px; }
+}
+
+@media (max-width: 360px) {
+  .wheel-frame { width: 230px; height: 230px; }
+  .wheel-canvas { width: 230px; height: 230px; }
+}
+
+</style>
+</head>
+<body>
+
+<!--顶部导航 -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-title">✿ Workshop</div>
+    <button class="tab-btn active" data-page="wheel">转盘</button>
+    <button class="tab-btn" data-page="generator">设定</button>
+    <button class="tab-btn" data-page="namer">起名</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ═══════灵感转盘 ═══════ -->
+  <div id="page-wheel" class="page active">
+    <div class="page-header">
+      <h1 class="page-title"><span class="icon">🎡</span>灵感转盘</h1>
+      <p class="page-desc">把想要的词条填进去，转一下看看命运给你什么。</p>
+    </div>
+
+    <div class="card">
+      <div class="wheel-section">
+        <div class="wheel-frame" id="wheelFrame">
+          <div class="wheel-pointer">💗</div>
+          <canvas id="wheelCanvas" class="wheel-canvas" width="600" height="600"></canvas>
+          <button class="spin-btn" id="spinBtn" onclick="spin()">转!</button>
+        </div>
+        <div class="result-box">
+          <span class="result-label">✦</span>
+          <span class="result-text" id="resultText">等你来转~</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 编辑词条</div>
+      <textarea class="items-input" id="itemsInput" placeholder="一行一个词条~">废墟都市
+海底遗迹
+漂浮岛屿
+永夜森林
+星际列车
+地下教廷
+镜像世界
+末日前夜
+月光集市
+深渊灯塔</textarea>
+      <div class="btn-row">
+        <button class="btn primary" onclick="updateWheel()">更新转盘</button>
+        <button class="btn" onclick="clearHistory()">清空记录</button>
+      </div>
+    </div>
+
+    <div class="card" id="historyCard" style="display:none;">
+      <div class="card-title">🕐 历史记录</div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
+    <!-- 多层组合 -->
+    <div class="card">
+      <div class="card-title">🎲 多层组合</div>
+      <p style="font-size:12px; color:var(--text3); margin-bottom:16px;">三个维度同时随机，组合出意想不到的东西。</p>
+
+      <div class="layer-grid">
+        <div class="layer-item">
+          <label>🌸 风格</label>
+          <input type="text" id="layer1" value="赛博朋克,哥特, 田园, 废土,洛可可, 蒸汽朋克">
+        </div>
+        <div class="layer-item">
+          <label>🔮 元素</label>
+          <input type="text" id="layer2" value="失忆, 替身, 契约, 预言, 时间循环, 禁术">
+        </div>
+        <div class="layer-item">
+          <label>⚡ 张力</label>
+          <input type="text" id="layer3" value="背叛, 献祭, 追逐, 试探, 坠落, 觉醒">
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:16px; margin-top: 4px;">
+        <button class="btn primary" onclick="comboSpin()">一键组合</button>
+      </div>
+
+      <div class="combo-result" id="comboResult">点上面的按钮看看~</div>
+    </div>
+  </div>
+
+  <!-- ═══════ 设定生成 ═══════ -->
+<div id="page-generator" class="page">
+  <div class="page-header">
+    <h1class="page-title"><span class="icon">⚙️</span>设定生成</h1>
+    <p class="page-desc">告诉它你想要什么方向，它帮你展开。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💭 描述你的想法</div>
+    <textarea class="items-input" id="settingInput" style="min-height:100px;" placeholder="比如：一个建在巨型生物骨架上的城市，居民靠采集骨髓中的能量生存，有严格的阶层制度..."></textarea>
+    <div class="btn-row">
+      <button class="btn primary" id="settingBtn" onclick="generateSetting()">生成</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📜 生成结果</div>
+    <pre id="settingOutput" style="white-space:pre-wrap; word-break:break-word; font-family:inherit; font-size:14px; line-height:1.9; color:var(--text1); min-height:80px;">还没有生成内容，在上面写点什么然后点生成~</pre>
+  </div>
+</div>
+
+  <!-- ═══════ 起名器 ═══════ -->
+<div id="page-namer" class="page">
+  <div class="page-header">
+    <h1 class="page-title"><span class="icon">✨</span>起名器</h1>
+    <p class="page-desc">按条件批量生成角色名。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎯 起名条件</div>
+    <div class="layer-grid">
+      <div class="layer-item">
+        <label>文化圈</label>
+        <select id="nameCulture" style="width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); background:#fef7fa; color:var(--text1); font-family:inherit; font-size:13px;">
+          <option value="北欧/日耳曼">北欧/日耳曼</option>
+          <option value="日系">日系</option>
+          <option value="现代中文">现代中文</option>
+          <option value="拉丁/罗曼语系">拉丁/罗曼语系</option>
+          <option value="斯拉夫">斯拉夫</option>
+          <option value="阿拉伯/波斯">阿拉伯/波斯</option>
+          <option value="古风">古风</option>
+          <option value="架空/无特定文化">架空/无特定文化</option>
+        </select>
+      </div>
+      <div class="layer-item">
+        <label>性别</label>
+        <select id="nameGender" style="width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); background:#fef7fa; color:var(--text1); font-family:inherit; font-size:13px;">
+          <option value="男性">男性</option>
+          <option value="女性">女性</option>
+          <option value="中性/不限">中性</option>
+        </select>
+      </div>
+      <div class="layer-item">
+        <label>风格</label>
+        <select id="nameStyle" style="width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); background:#fef7fa; color:var(--text1); font-family:inherit; font-size:13px;">
+          <option value="硬朗/力量感">硬朗</option>
+          <option value="柔和/优雅">柔和</option>
+          <option value="诡异/暗黑">诡异</option>
+          <option value="古典/庄重">古典</option>
+          <option value="现代/简洁">现代</option>
+          <option value="可爱/轻快">可爱</option></select>
+      </div></div>
+    <div style="margin-top:12px;">
+      <label style="display:block; font-size:12px; font-weight:600; color:var(--text3); margin-bottom:6px;">额外要求（选填）</label>
+      <input type="text" id="nameExtra" style="width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); background:#fef7fa; color:var(--text1); font-family:inherit; font-size:13px;" placeholder="比如：名字里要有月亮相关的意象">
+    </div>
+    <div class="btn-row" style="margin-top:14px;">
+      <button class="btn primary" id="nameBtn" onclick="generateNames()">生成</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 生成结果</div>
+    <pre id="nameOutput" style="white-space:pre-wrap; word-break:break-word; font-family:inherit; font-size:14px; line-height:1.9; color:var(--text1); min-height:80px;">选好条件然后点生成~</pre>
+  </div>
+</div>
+
+</div>
+
+<script>
+/* ═══ 转盘 ═══ */
+
+/*═══ API调用 ═══ */
+
+async function callAPI(type, userMessage, options = {}) {
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: type,
+        messages: [{ role: 'user', content: userMessage }],
+        model: options.model || 'gpt-4o-mini',
+        temperature: options.temperature || 0.85,
+        max_tokens: options.max_tokens || 2000
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.detail || err.error || 'Request failed');
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+}
+
+/* ═══ 设定生成器 ═══ */
+
+async function generateSetting() {
+  const input = document.getElementById('settingInput');
+  const output = document.getElementById('settingOutput');
+  const btn = document.getElementById('settingBtn');
+  const prompt = input.value.trim();
+
+  if (!prompt) return;
+
+  btn.disabled = true;
+  btn.textContent = '生成中...';
+  output.textContent = '正在生成，等一下~';
+  output.style.opacity = '0.5';
+
+  try {
+    const result = await callAPI('setting', prompt, { max_tokens: 3000 });
+    output.textContent = result;
+    output.style.opacity = '1';} catch (e) {
+    output.textContent = '出错了：' + e.message;
+    output.style.opacity = '1';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '生成';}
+}
+
+/* ═══ 起名器 ═══ */
+
+async function generateNames() {
+  const culture = document.getElementById('nameCulture').value;
+  const gender = document.getElementById('nameGender').value;
+  const style = document.getElementById('nameStyle').value;
+  const extra = document.getElementById('nameExtra').value.trim();
+  const output = document.getElementById('nameOutput');
+  const btn = document.getElementById('nameBtn');
+
+  const prompt = `请生成角色名。
+文化圈/语言：${culture}
+性别倾向：${gender}
+风格：${style}
+${extra ? '额外要求：' + extra : ''}
+生成10个名字，每个附带简短的含义或来源。`;
+
+  btn.disabled = true;
+  btn.textContent = '生成中...';
+  output.textContent = '正在起名...';
+  output.style.opacity = '0.5';
+
+  try {
+    const result = await callAPI('name', prompt);
+    output.textContent = result;
+    output.style.opacity = '1';
+  } catch (e) {
+    output.textContent = '出错了：' + e.message;
+    output.style.opacity = '1';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '生成';
+  }
+}
+
+let items = [];
+let currentAngle = 0;
+let spinning = false;
+let history = [];
+
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+
+// canvas内部尺寸固定600x600，CSS缩放显示
+const CW = 600, CH = 600;
+const centerX = CW / 2, centerY = CH / 2, radius = 270;
+
+// 粉色系调色盘
+const palette = [
+  '#f48fb1', '#f06292', '#ec407a', '#f8bbd0',
+  '#e91e63', '#ff80ab', '#ff4081', '#f50057',
+  '#fce4ec', '#f9a8c9', '#e57399', '#c2185b',
+  '#ffb2cc', '#ff6f9c', '#d81b60', '#ad1457'
+];
+
+function getItems() {
+  const text = document.getElementById('itemsInput').value.trim();
+  if (!text) return [];
+  return text.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+}
+
+function drawWheel(highlightIndex) {
+  ctx.clearRect(0, 0, CW, CH);
+  if (items.length === 0) {
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fillStyle = '#fce4ec';
+    ctx.fill();
+    ctx.strokeStyle = '#f8bbd0';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.font = '600 22px Quicksand, Microsoft YaHei';
+    ctx.fillStyle = '#e0a0b0';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('还没有词条~', centerX, centerY);
+    return;
+  }
+
+  const n = items.length;
+  const arc = (2 * Math.PI) / n;
+
+  // 外圈装饰
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius + 6, 0, Math.PI * 2);
+  ctx.strokeStyle = '#f8bbd0';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  items.forEach((item, i) => {
+    const startAngle = currentAngle + i * arc;
+    const endAngle = startAngle + arc;
+
+    // 扇形
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+    ctx.closePath();
+
+    if (highlightIndex === i) {
+      ctx.fillStyle = '#fff0f5';
+    } else {
+      // 交替深浅
+      const ci = i % palette.length;
+      ctx.fillStyle = (i % 2 === 0) ? palette[ci] : lighten(palette[ci], 0.25);
+    }
+    ctx.fill();
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 文字 - 沿弧线中间，水平放置
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(startAngle + arc / 2);
+
+    const fontSize = n > 14 ? 16 : n > 10 ? 18 : 22;
+    ctx.font = `600 ${fontSize}px Quicksand, Microsoft YaHei`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = (highlightIndex === i) ? '#e91e63' : '#fff';
+
+    // 文字画在扇形中段位置
+    const textR = radius * 0.62;
+
+    // 如果扇形角度太小，缩短文字
+    let displayText = item;
+    if (arc < 0.35&& item.length > 4) {
+      displayText = item.slice(0, 4) + '…';
+    }
+
+    ctx.fillText(displayText, textR,0);
+    ctx.restore();
+  });
+
+  // 中心圆
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 48, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();ctx.strokeStyle = '#f8bbd0';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+}
+
+function lighten(hex, amount) {
+  const num = parseInt(hex.slice(1), 16);
+  let r = (num >> 16) & 0xff;
+  let g = (num >> 8) & 0xff;
+  let b = num & 0xff;
+  r = Math.min(255, Math.round(r + (255 - r) * amount));
+  g = Math.min(255, Math.round(g + (255 - g) * amount));
+  b = Math.min(255, Math.round(b + (255 - b) * amount));
+  return `rgb(${r},${g},${b})`;
+}
+
+function updateWheel() {
+  items = getItems();
+  drawWheel(-1);
+}
+
+function spin() {
+  if (spinning || items.length === 0) return;
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+
+  const totalRotation = (Math.random() * 5+ 8) * Math.PI * 2;
+  const duration = 3600;
+  const startAngle = currentAngle;
+  const startTime = performance.now();
+
+  function easeOut(t) {
+    return 1 - Math.pow(1 - t, 4);
+  }
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    currentAngle = startAngle + totalRotation * easeOut(progress);
+    drawWheel(-1);
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      spinning = false;
+      document.getElementById('spinBtn').disabled = false;
+
+      const arc = (2 * Math.PI) / items.length;
+      // 指针在顶部 = -π/2 = 3π/2
+      const pointerAngle = ((Math.PI * 1.5 - currentAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+      const index = Math.floor(pointerAngle / arc) % items.length;
+
+      const result = items[index];
+      document.getElementById('resultText').textContent = result;
+      drawWheel(index);
+
+      history.unshift(result);
+      if (history.length > 30) history.pop();
+      renderHistory();
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function renderHistory() {
+  const card = document.getElementById('historyCard');
+  const container = document.getElementById('historyList');
+  if (history.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+  container.innerHTML = history.map(h =>
+    `<span class="history-tag">${h}</span>`
+  ).join('');
+}
+
+function clearHistory() {
+  history = [];
+  renderHistory();
+}
+
+/* ═══ 多层组合 ═══ */
+
+function parseLayer(id) {
+  const val = document.getElementById(id).value.trim();
+  if (!val) return [];
+  return val.split(/[,，]/).map(s => s.trim()).filter(s => s.length > 0);
+}
+
+function comboSpin() {
+  const layers = [
+    { name: '风格', items: parseLayer('layer1') },
+    { name: '元素', items: parseLayer('layer2') },
+    { name: '张力', items: parseLayer('layer3') }
+  ];
+
+  const picks = layers.map(l => {
+    if (l.items.length === 0) return '（空）';
+    return l.items[Math.floor(Math.random() * l.items.length)];
+  });
+
+  const el = document.getElementById('comboResult');
+  el.innerHTML = `<span>${picks[0]}</span> × <span>${picks[1]}</span> × <span>${picks[2]}</span>`;
+
+  // 小动画
+  el.style.transform = 'scale(0.96)';
+  setTimeout(() => { el.style.transform = 'scale(1)'; el.style.transition = 'transform 0.3s'; }, 50);
+}
+
+/* ═══ 页面切换 ═══ */
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const page = this.dataset.page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    this.classList.add('active');window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+/* ═══ 响应式canvas ═══ */
+
+function resizeCanvas() {
+  const frame = document.getElementById('wheelFrame');
+  const w = frame.clientWidth;
+  canvas.style.width = w + 'px';
+  canvas.style.height = w + 'px';
+}
+
+window.addEventListener('resize', resizeCanvas);
+
+/* ═══ 初始化 ═══ */
+updateWheel();
+resizeCanvas();
+
+</script>
+</body>
+</html>
